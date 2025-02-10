@@ -6,11 +6,13 @@ import shutil
 def read_dir(base_path="."):
     files = []
     dirs = []
-
+    if base_path == "./duplicates" or base_path == "./output":
+        return files
+    
     print(f"Reading directory '{base_path}' ... ", end="")
     dir_list = os.listdir(base_path)
     print(f"done ({len(dir_list)} files)")
-    
+
     for file in dir_list:
         sub_path = os.path.join(base_path, file)
         if os.path.isfile(sub_path):
