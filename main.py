@@ -189,7 +189,7 @@ def main():
             # skip for now
             continue
         rel_path, new_filename = generate_new_filename(file_path)
-        os.makedirs(file_path, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, rel_path), exist_ok=True)
 
         new_filename += ".jpg"
         if DO_COPY:
