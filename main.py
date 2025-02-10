@@ -181,6 +181,7 @@ def main():
     output_dir = os.path.join(starting_point, "output")
     os.makedirs(output_dir, exist_ok=True)
 
+    output_map = {}
 
     # We want to move files here when they did not collide with another file
     for tup in cache.values():
@@ -191,7 +192,19 @@ def main():
         rel_path, new_filename = generate_new_filename(file_path)
         os.makedirs(os.path.join(output_dir, rel_path), exist_ok=True)
 
+        target_output_file = os.path.join(output_dir, rel_path, new_filename)
+        date_col_index = None
+        if target_output_file in output_map:
+            output_map[target_output_file] += 1
+            date_col_index = output_map[target_output_file]
+        else:
+            output_map[target_output_file] = 1
+
+        if date_col_index is not None:
+            new_filename += f"_{date_col_index}"
+
         new_filename += ".jpg"
+
         if DO_COPY:
             shutil.copy(file_path, os.path.join(output_dir, rel_path, new_filename))
         elif DO_MOVE:
