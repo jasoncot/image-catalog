@@ -189,6 +189,7 @@ def main():
             # skip for now
             continue
         rel_path, new_filename = generate_new_filename(file_path)
+        new_filename += ".jpg"
         if DO_COPY:
             shutil.copy(file_path, os.path.join(output_dir, rel_path, new_filename))
         elif DO_MOVE:
