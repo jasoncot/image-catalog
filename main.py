@@ -87,7 +87,7 @@ def generate_new_filename(path):
             return build_path_from_exif_datetime(datetime)
         except:
             # need to find alternate route here
-            append_error(f"{path} did not contain datetime exif data")
+            append_error(f"\"{path}\" did not contain datetime exif data.\n")
 
     print(f"datetime: {datetime}")
     return "", datetime
