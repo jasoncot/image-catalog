@@ -112,6 +112,7 @@ def main():
 
     file_index = 0
     file_to_hash_list = []
+    skipped_files = []
 
     for path in files_in_dir:
         print("Reading file %d" % (file_index), end="\r")
@@ -120,7 +121,14 @@ def main():
         # make sure we aren't diving back into the duplicates or output paths
         if path.startswith("./duplicates") or path.startswith("./output"):
             continue
-
+        
+        # skip these extensions
+        split_ext = os.path.splitext(path)
+        cur_ext = split_ext[1].lower()
+        if cur_ext != ".jpg" and cur_ext != ".jpeg":
+            skipped_files.append(path)
+            continue
+        
         file_to_hash_list.append([path, hash_contents(read_file(path))])
 
     # now that we have read in all the files and created hashes
