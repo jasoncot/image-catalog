@@ -38,6 +38,31 @@ def append_to_file(file, text):
 def append_source_to_data_file(path, filename):
     append_to_file(os.path.join(path, "source_data.txt"), f"{filename}\n")
 
+def append_error(error_text):
+    append_to_file(os.path.join(".", "output", "errors.txt"), error_text)
+
+MONTH_NAMES = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
+
+def build_path_from_exif_datetime(datetime):
+    path = None
+    filename = None
+    (left, _, right) = datetime.partition(" ")
+    if left.find(":") != -1:
+        parts = left.split(":")
+        year, month, day = parts[0], int(parts[1]), parts[2]
+        month_str = "%02d_%s" % (month, MONTH_NAMES[month - 1])
+        path = os.path.join(f"{year}", month_str)
+        filename = f"{year}{parts[1]}{day}"
+
+    if right is not None:
+        parts = right.split(":")
+        hour, minute, second = parts[0], parts[1], parts[2]
+        if filename is None:
+            filename = ""
+        filename += f"_{hour}{minute}{second}"
+
+    return path, filename
+
 # take a path to a file, see if it's a jpg/jpeg and if it is, read the exif data
 # returns a string that should be the new file name based on the exif data
 # would like to seperate out paths like year/{month_no}_{month_name}/{year}{month_no}{day_no}{hour}{minute}.{ext}
@@ -51,7 +76,13 @@ def generate_new_filename(path):
     datetime = ""
     with open(path, 'rb') as image_file:
         my_image = Image(image_file)
-        datetime = my_image.datetime
+        datetime = ""
+        try:
+            datetime = my_image.datetime
+            return build_path_from_exif_datetime(datetime)
+        except:
+            # need to find alternate route here
+            append_error(f"{path} did not contain datetime exif data")
 
     print(f"datetime: {datetime}")
     return "", datetime
@@ -72,18 +103,29 @@ def main():
     cache = {}
     coll = [];
 
+    file_index = 0
+    file_to_hash_list = []
+
     for path in files_in_dir:
+        print("Reading file %d" % (file_index), end="\r")
+        file_index += 1
+
         # make sure we aren't diving back into the duplicates or output paths
         if path.startswith("./duplicates") or path.startswith("./output"):
             continue
 
-        hash_value = hash_contents(read_file(path))
+        file_to_hash_list.append([path, hash_contents(read_file(path))])
+
+    # now that we have read in all the files and created hashes
+    # determine which files are duplicates
+    for pair in file_to_hash_list:
+        path, hash_value = pair
         if hash_value in cache:
             hash_dup_dir = os.path.join(duplicates_dir, hash_value)
             os.makedirs(hash_dup_dir, exist_ok=True)
             existing_files = read_dir(hash_dup_dir)
             my_path = cache[hash_value][0]
-            
+
             if len(existing_files) > 0:
                 split_ext = os.path.splitext(path)
                 dst_filename = f"duplicate_file_{len(existing_files)}{split_ext[1]}"
