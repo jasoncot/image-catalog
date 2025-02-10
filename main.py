@@ -6,8 +6,11 @@ import shutil
 def read_dir(base_path="."):
     files = []
     dirs = []
-    dir_list = os.listdir(base_path)
 
+    print(f"Reading directory '{base_path}' ... ", end="")
+    dir_list = os.listdir(base_path)
+    print(f"done ({len(dir_list)} files)")
+    
     for file in dir_list:
         sub_path = os.path.join(base_path, file)
         if os.path.isfile(sub_path):
@@ -96,6 +99,8 @@ def main():
     starting_point = "."
     duplicates_dir = os.path.join(starting_point, "duplicates")
     os.makedirs(duplicates_dir, exist_ok=True)
+
+    print(f"Reading files starting at {starting_point}")
 
     files_in_dir = read_dir(starting_point)
     print("There were %d files in the directory '%s'" % (len(files_in_dir), starting_point))
