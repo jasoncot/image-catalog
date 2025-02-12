@@ -112,7 +112,9 @@ def generate_new_filename(path):
     try:
         return build_path_from_exif_datetime(datetime)
     except:
+        print(f"There was a problem with file on this path: {path}")
         print(f"There was an error with this datetime: {datetime}")
+        raise Exception(f"Unable to parse datetime correctly {datetime} from file at path {path}")
         return None, None
 
 
