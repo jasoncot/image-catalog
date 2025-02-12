@@ -96,7 +96,8 @@ def generate_new_filename(path):
     if ext != ".jpg" and ext != ".jpeg":
         return None, None
     
-    datetime = ""
+    datetime = None
+
     my_image, error_message = read_exif_from_image(path)
     if error_message is not None:
         append_error(error_message)
@@ -105,19 +106,26 @@ def generate_new_filename(path):
     keys = None
     try:
         keys = my_image.list_all()
-        keys.index('datetime')
-        datetime = my_image.datetime
+        if "datetime" in keys:
+            datetime = my_image.datetime
+        elif "datetime_original" in keys:
+            datetime = my_image.datetime_original
+        elif "datetime_digitized" in keys:
+            datetime = my_image.datetime_digitized
     except:
         append_error(f"{path} did not contain 'datetime' key.")
         if keys is not None:
             append_error(" keys were: " + ", ".join(keys))
+    
+    if datetime is None:
+        return None, None
+
     try:
         return build_path_from_exif_datetime(datetime)
     except:
         print(f"There was a problem with file on this path: {path}")
         print(f"There was an error with this datetime: {datetime}")
         raise Exception(f"Unable to parse datetime correctly {datetime} from file at path {path}")
-        return None, None
 
 
 DO_COPY = False
