@@ -109,8 +109,11 @@ def generate_new_filename(path):
         append_error(f"{path} did not contain 'datetime' key.")
         if keys is not None:
             append_error(" keys were: " + ", ".join(keys))
-
-    return build_path_from_exif_datetime(datetime)
+    try:
+        return build_path_from_exif_datetime(datetime)
+    except:
+        print(f"There was an error with this datetime: {datetime}")
+        return None, None
 
 
 DO_COPY = False
