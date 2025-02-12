@@ -77,6 +77,8 @@ def read_exif_from_image(image_path):
     with open(image_path, 'rb') as image_file:
         try:
             my_image = Image(image_file)
+            if my_image.has_exif == False:
+                return None, "file {image_path} has no exif data"
         except:
             return None, f"file {image_path} had a problem parsing exif"
         
