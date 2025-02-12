@@ -1,4 +1,4 @@
-import piexif
+# import piexif
 from exif import Image
 import sys
 import os
@@ -27,5 +27,9 @@ def main():
                 print_all_items(my_image.list_all())
             else:
                 print("there was no exif?")
+                return
+
+            print("datetime: " + my_image.datetime)
+
 
 main()
