@@ -89,8 +89,10 @@ def read_exif_from_image(image_path):
 def generate_new_filename(path):
     split_ext = os.path.splitext(path)
     ext = split_ext[1].lower()
+
+    # if it's not a .jpeg or .jpg, we shouldn't do anything with it..
     if ext != ".jpg" and ext != ".jpeg":
-        return "", os.path.basename(path)
+        return None, None
     
     datetime = ""
     my_image, error_message = read_exif_from_image(path)
@@ -108,7 +110,7 @@ def generate_new_filename(path):
         if keys is not None:
             append_error(" keys were: " + ", ".join(keys))
 
-    return "", datetime
+    return build_path_from_exif_datetime(datetime)
 
 
 DO_COPY = False
