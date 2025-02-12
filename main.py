@@ -68,6 +68,20 @@ def build_path_from_exif_datetime(datetime):
 
     return path, filename
 
+def read_exif_from_image(image_path):
+    # make sure the file exists
+    if os.path.isfile(image_path) == False:
+        return None, f"file {image_path} does not exist"
+    
+    my_image = None
+    with open(image_path, 'rb') as image_file:
+        try:
+            my_image = Image(image_file)
+        except:
+            return None, f"file {image_path} had a problem parsing exif"
+        
+    return my_image, None
+
 # take a path to a file, see if it's a jpg/jpeg and if it is, read the exif data
 # returns a string that should be the new file name based on the exif data
 # would like to seperate out paths like year/{month_no}_{month_name}/{year}{month_no}{day_no}{hour}{minute}.{ext}
@@ -79,17 +93,21 @@ def generate_new_filename(path):
         return "", os.path.basename(path)
     
     datetime = ""
-    with open(path, 'rb') as image_file:
-        my_image = Image(image_file)
-        datetime = ""
-        try:
-            datetime = my_image.datetime
-            return build_path_from_exif_datetime(datetime)
-        except:
-            # need to find alternate route here
-            append_error(f"\"{path}\" did not contain datetime exif data.\n")
+    my_image, error_message = read_exif_from_image(path)
+    if error_message is not None:
+        append_error(error_message)
+        return None, None
 
-    print(f"datetime: {datetime}")
+    keys = None
+    try:
+        keys = my_image.list_all()
+        keys.index('datetime')
+        datetime = my_image.datetime
+    except:
+        append_error(f"{path} did not contain 'datetime' key.")
+        if keys is not None:
+            append_error(" keys were: " + ", ".join(keys))
+
     return "", datetime
 
 
@@ -190,6 +208,10 @@ def main():
             # skip for now
             continue
         rel_path, new_filename = generate_new_filename(file_path)
+
+        if rel_path is None or new_filename is None:
+            continue
+        
         os.makedirs(os.path.join(output_dir, rel_path), exist_ok=True)
 
         target_output_file = os.path.join(output_dir, rel_path, new_filename)
