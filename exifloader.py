@@ -8,6 +8,27 @@ def print_all_items(items):
     for item in items:
         print(" " + item)
 
+MONTH_NAMES = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
+
+def build_path_from_exif_datetime(datetime):
+    path = None
+    filename = None
+    (left, _, right) = datetime.partition(" ")
+    if left.find(":") != -1:
+        parts = left.split(":")
+        year, month, day = parts[0], int(parts[1]), parts[2]
+        month_str = "%02d_%s" % (month, MONTH_NAMES[month - 1])
+        path = os.path.join(f"{year}", month_str)
+        filename = f"{year}{parts[1]}{day}"
+
+    if right is not None:
+        parts = right.split(":")
+        hour, minute, second = parts[0], parts[1], parts[2]
+        if filename is None:
+            filename = ""
+        filename += f"_{hour}{minute}{second}"
+
+    return path, filename
 
 def main():
     n = len(sys.argv)
@@ -30,6 +51,9 @@ def main():
                 return
 
             print("datetime: " + my_image.datetime)
+            path, filename = build_path_from_exif_datetime(my_image.datetime)
+            print("path: " + path)
+            print("filename: " + filename)
 
 
 main()
